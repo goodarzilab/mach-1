@@ -1,31 +1,22 @@
-conda create -p /envs/lornash -y
-conda activate /envs/lornash
+mamba create --name lornash -y pip "python==3.10" numpy
 
-# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia -y
-pip install packaging
-pip install ninja
+conda activate lornash
 
-mkdir /envs/lornash/sources
+mamba install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia -y
+pip install packaging ninja wheel
+mamba install -y nvidia/label/cuda-12.4.0::cuda-toolkit libxcrypt
 
-git clone https://github.com/Dao-AILab/flash-attention.git
-cd flash-attention 
-python setup.py install
-cd csrc/rotary 
-pip install .
-cd ../layer_norm 
-pip install .
+pip install git+https://github.com/Dao-AILab/flash-attention.git
+pip install git+https://github.com/Dao-AILab/flash-attention.git#subdirectory=csrc/rotary
+# this cannot be installed with pip
+# pip install git+https://github.com/Dao-AILab/flash-attention.git#subdirectory=csrc/layer_norm
+mamba install -c nvidia -c pytorch conda-forge::flash-attn-layer-norm=2.6.3 pytorch pytorch-cuda=12.4
 
-cd /envs/lornash/sources
- 
-git clone https://github.com/HazyResearch/flash-fft-conv.git
-cd flash-fft-conv/csrc/flashfftconv
-python setup.py install
-cd ../..
-python setup.py install
+pip install torch==2.4.1+cu124 --index-url https://download.pytorch.org/whl/cu124
 
-cd /envs/lornash
+# in a device with GPU
+pip install git+https://github.com/HazyResearch/flash-fft-conv.git#subdirectory=csrc/flashfftconv
+pip install git+https://github.com/HazyResearch/flash-fft-conv.git
 
-pip install triton
-pip install evo-model
-pip install transformers tokenizers accelerate datasets evaluate
+pip install triton evo-model transformers tokenizers accelerate datasets evaluate wandb
+mamba install -c conda-forge -c bioconda r-optparse r-data.table r-stringr bioconductor-rtracklayer bioconductor-bsgenome.hsapiens.ucsc.hg38

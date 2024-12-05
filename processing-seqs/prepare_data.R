@@ -3,10 +3,18 @@ library(data.table)
 library(stringr)
 library(rtracklayer)
 
+# Development
+# -----------
+# gtf_file = "~/databases/data/GENCODE/gencode.v44.annotation.gtf.gz"
+# gtf_file = "~/repositories/lorna-sh/example-CD44.gtf.gz"
+
+
 option_list <- list(
   make_option(c("-s", "--species"), type = "character", default = 'human', help = "Species name (human or mouse)"),
   make_option(c("-f", "--flank_len"), type = "integer", default = 16, help = "Flanking length"),
-  make_option(c("-m", "--max_seq_len"), type = "integer", default = 2^16, help = "Maximum sequence length")
+  make_option(c("-m", "--max_seq_len"), type = "integer", default = 2^16, help = "Maximum sequence length"),
+  make_option(c("--gtf_file"), type = "integer", default = 2^16, help = "Maximum sequence length"),
+  make_option(c("--output_file"), type = "integer", default = 2^16, help = "Maximum sequence length")
 )
 
 opt_parser <- OptionParser(option_list = option_list)
@@ -15,6 +23,8 @@ opt <- parse_args(opt_parser)
 species <- opt$species
 flank_len <- opt$flank_len
 max_seq_len <- opt$max_seq_len
+gtf_file <- opt$gtf_file
+output_file <- opt$output_file
 
 if (is.null(species)) {
   stop("Species must be provided using -s or --species option")
@@ -24,10 +34,10 @@ if (species == 'human') {
   
   library(BSgenome.Hsapiens.UCSC.hg38)
   ref_genome <- BSgenome.Hsapiens.UCSC.hg38
-  gtf_file <- '/scratch/asabe/projects/foundation-model/preprocess/pre-mrna/data/databank_human_bambu_se_discovery.gtf'
-  assembly_report_file <- '/scratch/asabe/projects/pacbio/data/references/genome/GRCh38_latest_assembly_report.txt'
   species_token <- 'H'
-  output_file <- '/scratch/asabe/projects/foundation-model/preprocess/pre-mrna/data/databank_human_bambu_se_discovery.preprocessed.updated.csv.gz'
+  # gtf_file <- '/scratch/asabe/projects/foundation-model/preprocess/pre-mrna/data/databank_human_bambu_se_discovery.gtf'
+  # assembly_report_file <- '/scratch/asabe/projects/pacbio/data/references/genome/GRCh38_latest_assembly_report.txt'
+  # output_file <- '/scratch/asabe/projects/foundation-model/preprocess/pre-mrna/data/databank_human_bambu_se_discovery.preprocessed.updated.csv.gz'
   
 } else if (species == 'mouse') {
   
@@ -48,24 +58,28 @@ columns_to_keep <- intersect(columns_to_keep, colnames(gtf))
 gtf <- gtf[, columns_to_keep, with = F]
 gtf <- gtf[type %in% c('transcript', 'exon')]
 gtf[, exon_number := as.integer(exon_number)]
-gtf[transcript_id %like% 'Bambu', transcript_id := str_c(species_token, transcript_id)]
-gtf[gene_id %like% 'Bambu', gene_id := str_c(species_token, gene_id)]
+# gtf[transcript_id %like% 'Bambu', transcript_id := str_c(species_token, transcript_id)]
+# gtf[gene_id %like% 'Bambu', gene_id := str_c(species_token, gene_id)]
 
 
-assembly_info <- fread(assembly_report_file,
-                      skip = '# Sequence-Name',
-                      header = T,
-                      select = c('GenBank-Accn', 'RefSeq-Accn', 'UCSC-style-name', 'Sequence-Length'),
-                      col.names = c('genbank_seqnames', 'refseq_seqnames', 'chr', 'chr_len'))
+# assembly_info <- fread(assembly_report_file,
+#                       skip = '# Sequence-Name',
+#                       header = T,
+#                       select = c('GenBank-Accn', 'RefSeq-Accn', 'UCSC-style-name', 'Sequence-Length'),
+#                       col.names = c('genbank_seqnames', 'refseq_seqnames', 'chr', 'chr_len'))
 
+assembly_info = seqlengths(ref_genome)
+assembly_info = data.frame(
+    chr = names(assembly_info),
+    chr_len = assembly_info
+)
 
-  
-setnames(assembly_info, 'genbank_seqnames', 'seqnames')
-gtf <- merge(gtf, assembly_info[, .(seqnames, chr)], by = 'seqnames', all.x = TRUE)
-gtf[!is.na(chr), seqnames := chr]
-gtf[, chr := NULL]
+# setnames(assembly_info, 'genbank_seqnames', 'seqnames')
+# gtf <- merge(gtf, assembly_info[, .(seqnames, chr)], by = 'seqnames', all.x = TRUE)
+# gtf[!is.na(chr), seqnames := chr]
+# gtf[, chr := NULL]
 
-gtf <- merge(gtf, assembly_info[, .(chr, chr_len)], by.x = 'seqnames', by.y = 'chr', all.x = TRUE)
+gtf <- merge(gtf, assembly_info, by.x = 'seqnames', by.y = 'chr', all.x = TRUE)
   
 ### First primary chromosomes, then random, then unlocalized
 chr_order <- gtf[, .(seqnames)]

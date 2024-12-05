@@ -6,18 +6,19 @@ from datasets import load_dataset, DatasetDict
 SEED = 42
 set_seed(SEED)
 
-validation_chr = 'chr10'
-test_chr = 'chr8'
+# validation_chr = 'chr10'
+# test_chr = 'chr8'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--data', type=str, help='Name of processed sequence data file')
 parser.add_argument('-t', '--tokenizer', type=str, help='Path to tokenizer json file')
-parser.add_argument('-m', '--max_seq_len', type=int, help='Maximum sequence length')
-parser.add_argument('-p', '--num_threads', type=int, help='Number of threads')
+parser.add_argument('-m', '--max_seq_len', type=int, help='Maximum sequence length', default=2**16)
+parser.add_argument('-p', '--num_threads', type=int, help='Number of threads', default=1)
+parser.add_argument('--tokenization_output_dir', type=str, default="tokenization")
 
 args = parser.parse_args()
 
-tokenization_output_dir = '/large_storage/goodarzilab/saberi/tokenization'
+tokenization_output_dir = args.tokenization_output_dir
 os.makedirs(tokenization_output_dir, exist_ok=True)
 
 tokenizer = PreTrainedTokenizerFast(
@@ -38,14 +39,13 @@ raw_datasets = load_dataset('csv', data_files=args.data)
 dataset_columns = raw_datasets.column_names['train']
 raw_datasets = raw_datasets['train']
 
-validation_dataset = raw_datasets.filter(lambda x: x['chr'] == validation_chr, num_proc=args.num_threads)
-test_dataset = raw_datasets.filter(lambda x: x['chr'] == test_chr, num_proc=args.num_threads)
-train_dataset = raw_datasets.filter(lambda x: (x['chr'] != validation_chr) & (x['chr'] != test_chr), num_proc=args.num_threads)
+# validation_dataset = raw_datasets.filter(lambda x: x['chr'] == validation_chr, num_proc=args.num_threads)
+# test_dataset = raw_datasets.filter(lambda x: x['chr'] == test_chr, num_proc=args.num_threads)
+# train_dataset = raw_datasets.filter(lambda x: (x['chr'] != validation_chr) & (x['chr'] != test_chr), num_proc=args.num_threads)
 
 raw_datasets = DatasetDict(
-    {'train': train_dataset,
-    'validation': validation_dataset,
-    'test': test_dataset})
+    {'dataset': raw_datasets}
+)
 
 def tokenize_seqs(examples):
     return tokenizer(

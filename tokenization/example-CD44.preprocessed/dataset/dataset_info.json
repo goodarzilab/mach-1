@@ -1,0 +1,110 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "csv",
+  "dataset_size": 24174,
+  "description": "",
+  "download_checksums": {
+    "/users/lserrano/manglada/repositories/lorna-sh/example-CD44.preprocessed.csv.gz": {
+      "num_bytes": 6421,
+      "checksum": null
+    }
+  },
+  "download_size": 6421,
+  "features": {
+    "species": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "chr": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "strand": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "gene_start": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "gene_end": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "gene_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "tr_start": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "tr_end": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "transcript_id": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "num_exons": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "tr_len": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "seq_len": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "input_ids": {
+      "feature": {
+        "dtype": "int32",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "token_type_ids": {
+      "feature": {
+        "dtype": "int8",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "attention_mask": {
+      "feature": {
+        "dtype": "int8",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "special_tokens_mask": {
+      "feature": {
+        "dtype": "int8",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 30595,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 24174,
+      "num_examples": 4,
+      "dataset_name": "csv"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
