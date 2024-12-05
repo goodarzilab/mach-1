@@ -63,12 +63,23 @@ python processing-seqs/tokenize_data.py \
 ```
 4. Get likelihoods
 ```
-WANDB_MODE=disabled python training-model/get_likelihoods.py \
-            --checkpoint="weights/model.safetensors" \
+python training-model/get_likelihoods.py \
+            --checkpoint="weights" \
             --tokenizer="processing-seqs/lornash_tokenizer.json" \
             --dataset="tokenization/example-CD44.preprocessed" \
             --dataset_type="example" \
             --predictions_dir="predictions" \
             --num_shards=1 \
-            --num_threads=4 \
+            --num_threads=4
+```
+5. Get embeddings
+```
+python training-model/get_embeddings.py \
+            --checkpoint="weights" \
+            --tokenizer="processing-seqs/lornash_tokenizer.json" \
+            --dataset="tokenization/example-CD44.preprocessed" \
+            --dataset_type="example" \
+            --predictions_dir="predictions" \
+            --num_shards=1 \
+            --num_threads=4
 ```

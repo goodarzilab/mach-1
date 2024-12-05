@@ -17,6 +17,7 @@ from wandb import AlertLevel
 
 logger = logging.get_logger(__name__)
 
+
 class StripedHyenaPreTrainedModel(PreTrainedModel):
     config_class = StripedHyenaConfig
     base_model_prefix = "sh"
@@ -26,6 +27,7 @@ class StripedHyenaPreTrainedModel(PreTrainedModel):
     _keys_to_ignore_on_load_missing = [r"freq"]
     _keys_to_ignore_on_load_unexpected = [r"fftconv", r"twiddle_factors"]
     _supports_flash_attn_2 = True
+
 
 class StripedHyenaModelForCausalLM(StripedHyenaPreTrainedModel):
     supports_gradient_checkpointing = True
@@ -46,8 +48,8 @@ class StripedHyenaModelForCausalLM(StripedHyenaPreTrainedModel):
         self.force_dtype()
 
     def force_dtype(self):
-        self.backbone.to_bfloat16_except_poles_residues() 
-        
+        self.backbone.to_bfloat16_except_poles_residues()
+
     def _set_gradient_checkpointing(self, enable, gradient_checkpointing_func):
         self.backbone.gradient_checkpointing = enable
 
@@ -65,7 +67,9 @@ class StripedHyenaModelForCausalLM(StripedHyenaPreTrainedModel):
         past_key_values=None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        return_dict = (
+            return_dict if return_dict is not None else self.config.use_return_dict
+        )
         use_cache = use_cache if use_cache is not None else self.config.use_cache
 
         if use_cache:
@@ -100,8 +104,7 @@ class StripedHyenaModelForCausalLM(StripedHyenaPreTrainedModel):
                     past_key_values["hyena"].seqlen_offset += 1
 
                 inputs = input_ids[
-                    :,
-                    -1:,
+                    :, -1:,
                 ]
 
         logits, past_key_values = self.backbone(
@@ -123,7 +126,8 @@ class StripedHyenaModelForCausalLM(StripedHyenaPreTrainedModel):
                 wandb.alert(
                     title="Invalid loss value",
                     text="Loss is zero or NaN",
-                    level=AlertLevel.ERROR)
+                    level=AlertLevel.ERROR,
+                )
                 wandb.finish(exit_code=600)
 
         if return_dict:
@@ -154,23 +158,25 @@ class StripedHyenaForEmbeddings(StripedHyena):
     def __init__(self, config, tokenizer):
         super().__init__(config)
         self.tokenizer = tokenizer
-        self.tts_token_id = tokenizer.convert_tokens_to_ids(['S'])[0]
-        self.tes_token_id = tokenizer.convert_tokens_to_ids(['E'])[0]
-        self.dna_token_ids = tokenizer.convert_tokens_to_ids(['W', 'X', 'Y', 'Z'])
-        self.exon_token_ids = tokenizer.convert_tokens_to_ids(['a', 'c', 'g', 't'])
-        self.intron_token_ids = tokenizer.convert_tokens_to_ids(['A', 'C', 'G', 'T'])
+        self.tts_token_id = tokenizer.convert_tokens_to_ids(["S"])[0]
+        self.tes_token_id = tokenizer.convert_tokens_to_ids(["E"])[0]
+        self.dna_token_ids = tokenizer.convert_tokens_to_ids(["W", "X", "Y", "Z"])
+        self.exon_token_ids = tokenizer.convert_tokens_to_ids(["a", "c", "g", "t"])
+        self.intron_token_ids = tokenizer.convert_tokens_to_ids(["A", "C", "G", "T"])
 
     def forward(self, x, inference_params_dict=None, padding_mask=None):
         B, L = x.shape  # B: batch size, L: sequence length
         self.e_token_indices = (x == self.tts_token_id).nonzero(as_tuple=True)
-        
+
         x = self.embedding_layer.embed(x)  # Shape: (B, L, 128)
 
         e_token_embeddings = []
 
         if inference_params_dict is not None:
-            x, block_e_embeddings = self.stateful_forward(x, inference_params_dict, padding_mask)
-        else:    
+            x, block_e_embeddings = self.stateful_forward(
+                x, inference_params_dict, padding_mask
+            )
+        else:
             x, block_e_embeddings = self.stateless_forward(x, padding_mask)
 
         e_token_embeddings.extend(block_e_embeddings)
@@ -178,20 +184,22 @@ class StripedHyenaForEmbeddings(StripedHyena):
         x = self.norm(x) if self.norm else x
         x = self.unembed.unembed(x)
 
-        e_token_embeddings = torch.stack(e_token_embeddings, dim=1)  # Shape: (B, 17, 128)
-        
+        e_token_embeddings = torch.stack(
+            e_token_embeddings, dim=1
+        )  # Shape: (B, 17, 128)
+
         return x, e_token_embeddings
 
     def stateful_forward(self, x, inference_params_dict, padding_mask=None):
 
         e_token_embeddings = []
-        
+
         for block_idx, block in enumerate(self.blocks):
             block_name = "mha" if block_idx in self.config.attn_layer_idxs else "hyena"
             inference_params = inference_params_dict[block_name]
 
             x, _ = block(x, inference_params=inference_params)
-                
+
             e_token_emb = x[self.e_token_indices]
             e_token_embeddings.append(e_token_emb)
 
@@ -216,21 +224,22 @@ class CausalLMEmbeddingOutput(ModelOutput):
     loss: Optional[torch.FloatTensor] = None
     e_token_embs: torch.FloatTensor = None
 
+
 class StripedHyenaModelForExtractingEmbeddings(StripedHyenaPreTrainedModel):
     supports_gradient_checkpointing = True
 
-    def __init__(self, config, **kwargs):
+    def __init__(self, config, tokenizer, **kwargs):
         super().__init__(config, **kwargs)
         model_config = dotdict(config.to_dict())
-        self.backbone = StripedHyenaForEmbeddings(model_config)
+        self.backbone = StripedHyenaForEmbeddings(model_config, tokenizer)
         self.backbone.gradient_checkpointing = False
         self.config = config
         self.post_init()
         self.force_dtype()
 
     def force_dtype(self):
-        self.backbone.to_bfloat16_except_poles_residues() 
-        
+        self.backbone.to_bfloat16_except_poles_residues()
+
     def _set_gradient_checkpointing(self, enable, gradient_checkpointing_func):
         self.backbone.gradient_checkpointing = enable
 
@@ -248,7 +257,9 @@ class StripedHyenaModelForExtractingEmbeddings(StripedHyenaPreTrainedModel):
         past_key_values=None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        return_dict = (
+            return_dict if return_dict is not None else self.config.use_return_dict
+        )
         use_cache = use_cache if use_cache is not None else self.config.use_cache
 
         if use_cache:
@@ -283,8 +294,7 @@ class StripedHyenaModelForExtractingEmbeddings(StripedHyenaPreTrainedModel):
                     past_key_values["hyena"].seqlen_offset += 1
 
                 inputs = input_ids[
-                    :,
-                    -1:,
+                    :, -1:,
                 ]
 
         _, e_token_embeddings = self.backbone(
@@ -295,6 +305,4 @@ class StripedHyenaModelForExtractingEmbeddings(StripedHyenaPreTrainedModel):
 
         loss = torch.tensor(0.0)
 
-        return CausalLMEmbeddingOutput(
-            loss=loss,
-            e_token_embs=e_token_embeddings)
+        return CausalLMEmbeddingOutput(loss=loss, e_token_embs=e_token_embeddings)

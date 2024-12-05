@@ -6,3 +6,4 @@
 *.mcr
 *.private*
 Rplots.pdf
+*cache*
