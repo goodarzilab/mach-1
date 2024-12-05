@@ -219,10 +219,10 @@ class CausalLMEmbeddingOutput(ModelOutput):
 class StripedHyenaModelForExtractingEmbeddings(StripedHyenaPreTrainedModel):
     supports_gradient_checkpointing = True
 
-    def __init__(self, config, **kwargs):
+    def __init__(self, config, tokenizer, **kwargs):
         super().__init__(config, **kwargs)
         model_config = dotdict(config.to_dict())
-        self.backbone = StripedHyenaForEmbeddings(model_config)
+        self.backbone = StripedHyenaForEmbeddings(model_config, tokenizer)
         self.backbone.gradient_checkpointing = False
         self.config = config
         self.post_init()
