@@ -30,6 +30,12 @@ conda activate lornash
 mamba install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia -y
 pip install packaging ninja wheel
 mamba install nvidia/label/cuda-12.1.0::cuda-toolkit -y
+mamba install -c conda-forge -c bioconda r-optparse r-data.table r-stringr bioconductor-rtracklayer bioconductor-bsgenome.hsapiens.ucsc.hg38 rust -y
+pip install triton evo-model transformers tokenizers accelerate datasets evaluate wandb
+
+
+mamba create --file environment.yaml
+conda activate lornash
 
 N_CORES=5
 MAX_JOBS=$N_CORES pip install git+https://github.com/HazyResearch/flash-fft-conv.git#subdirectory=csrc/flashfftconv
@@ -38,9 +44,6 @@ MAX_JOBS=$N_CORES pip install git+https://github.com/HazyResearch/flash-fft-conv
 MAX_JOBS=$N_CORES pip install git+https://github.com/Dao-AILab/flash-attention.git@v2.7.0.post2
 MAX_JOBS=$N_CORES pip install git+https://github.com/Dao-AILab/flash-attention.git@v2.7.0.post2#subdirectory=csrc/rotary
 MAX_JOBS=$N_CORES pip install git+https://github.com/Dao-AILab/flash-attention.git@v2.7.0.post2#subdirectory=csrc/layer_norm
-
-mamba install -c conda-forge -c bioconda r-optparse r-data.table r-stringr bioconductor-rtracklayer bioconductor-bsgenome.hsapiens.ucsc.hg38 rust -y
-pip install triton evo-model transformers tokenizers accelerate datasets evaluate wandb
 ```
 
 ```
