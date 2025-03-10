@@ -1,0 +1,9 @@
+*ipynb_checkpoints*
+*snakemake*
+.done
+*.pyc
+*snakejob*
+*.mcr
+*.private*
+Rplots.pdf
+*cache*

@@ -1,6 +1,7 @@
 import json
 from transformers import PretrainedConfig
 
+
 class StripedHyenaConfig(PretrainedConfig):
     model_type = "stripedhyena"
 
