@@ -1,6 +1,6 @@
-# LoRNA-SH
+# Mach-1
 
-LoRNA-SH is a long-context RNA foundation model for predicting transcriptome architecture. This repository contains the training pipeline and model weights.
+Mach-1 is a long-context RNA foundation model for predicting transcriptome architecture. This repository contains the training pipeline and model weights.
 
 ## Repository Structure
 
