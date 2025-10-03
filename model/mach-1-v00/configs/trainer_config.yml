@@ -1,0 +1,25 @@
+seed: 42
+tokenizer: /home/saberi/projects/mach/mach-1/data/tokenizer/mach_1_tokenizer.json
+tokenized_dataset: /large_storage/goodarzilab/saberi/mach/mach-1/data/tokenized/human.c2l2.revio.gencode_v47.GRCh38_p14.UCSC_hg38.no_flank_dna.filt
+wandb_project: mach1_gen
+output_dir: /home/saberi/projects/mach/mach-1/model
+trainer_id: v03
+from_pretrained: /home/saberi/projects/mach/mach-1/model/mach1_gen/mach-1-v00-gen-v02/checkpoint-14336
+resume_from_checkpoint:
+num_train_epochs: 2048
+batch_size: 256
+gradient_accumulation_steps: 1
+group_by_length: True
+length_column_name: seq_len
+logging_steps: 32
+eval_steps: 1024
+save_steps: 1024
+warmup_ratio: 0.05
+learning_rate: 0.005
+lr_scheduler_type: cosine
+max_grad_norm: 1.0
+weight_decay: 0.0001
+no_decay: poles residues
+adamw_beta1: 0.9
+adamw_beta2: 0.95
+adamw_eps: 0.00000001
