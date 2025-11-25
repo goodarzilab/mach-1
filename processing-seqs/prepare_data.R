@@ -176,7 +176,7 @@ transform_to_non_rna_v <- Vectorize(transform_to_non_rna, 'seq')
 gtf[type %like% 'non_rna', seq := transform_to_non_rna_v(seq)]
 
 gtf[type == 'non_rna_upstream',  seq := str_c(seq, 'S')] ## Adding seq, S (TSS), will add the H/M token later
-gtf[type == 'non_rna_downstream', seq := str_c('E', seq)] ## Adding E (TTS), flank_end
+gtf[type == 'non_rna_downstream', seq := str_c('P', seq)] ## Adding P (PAS), flank_end
 gtf[type == 'intron', seq := str_to_lower(seq)]
 
 gtf[, type := factor(type, levels = c('non_rna_upstream', 'exon', 'intron', 'non_rna_downstream', 'transcript'), ordered = TRUE)]
@@ -190,7 +190,7 @@ complement_transformer <- c('A' = 'T', 'T' = 'A', 'C' = 'G', 'G' = 'C',
                            'a' = 't', 't' = 'a', 'c' = 'g', 'g' = 'c',
                            'W' = 'Z', 'Z' = 'W', 'X' = 'Y', 'Y' = 'X',
                            'D' = 'R', 'R' = 'D',
-                           'S' = 'E', 'E' = 'S')
+                           'S' = 'P', 'P' = 'S')
 
 transform_to_reverse_complement <- function(seq) {
   complement_transformer[
