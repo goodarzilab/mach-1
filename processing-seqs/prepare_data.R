@@ -103,7 +103,7 @@ gtf[, gene_end := gene_end + flank_len]
 
 gtf <- gtf[(gene_start >= 1) & (gene_end <= chr_len)]
 
-gtf[, tokenized_gene_len := (gene_end - gene_start + 1) + 1 + 1 + 1 + 1 + 1] ## CLS, H/M, S, E, SEP 
+gtf[, tokenized_gene_len := (gene_end - gene_start + 1) + 1 + 1 + 1 + 1 + 1] ## CLS, H/M, S, P, SEP 
 gtf <- gtf[tokenized_gene_len <= max_seq_len]
 gtf[, tokenized_gene_len := NULL]
 
@@ -177,7 +177,7 @@ gtf[type %like% 'non_rna', seq := transform_to_non_rna_v(seq)]
 
 gtf[type == 'non_rna_upstream',  seq := str_c(seq, 'S')] ## Adding seq, S (TSS), will add the H/M token later
 gtf[type == 'non_rna_downstream', seq := str_c('E', seq)] ## Adding E (TTS), flank_end
-gtf[type == 'exon', seq := str_to_lower(seq)]
+gtf[type == 'intron', seq := str_to_lower(seq)]
 
 gtf[, type := factor(type, levels = c('non_rna_upstream', 'exon', 'intron', 'non_rna_downstream', 'transcript'), ordered = TRUE)]
 
