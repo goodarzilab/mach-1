@@ -119,21 +119,21 @@ for i in range(last_saved_shard + 1, args.num_shards):
     seq_likelihood = [torch.sum(logprobs[i, labels[i] != tokenizer.pad_token_id]) for i in range(len(labels))]
     seq_likelihood_float = [float(ll) for ll in seq_likelihood]
     
-    tss_id, tts_id = tokenizer.convert_tokens_to_ids(['S', 'E'])
+    tss_id, pas_id = tokenizer.convert_tokens_to_ids(['S', 'P'])
 
     tss_index = torch.where(labels == tss_id)
     tss_logprobs = logprobs[tss_index[0], tss_index[1]]
     tss_logprobs = tss_logprobs.tolist()
 
-    tts_index = torch.where(labels == tts_id)
-    tts_logprobs = logprobs[tts_index[0], tts_index[1]]
-    tts_logprobs = tts_logprobs.tolist()
+    pas_index = torch.where(labels == pas_id)
+    pas_logprobs = logprobs[pas_index[0], pas_index[1]]
+    pas_logprobs = pas_logprobs.tolist()
 
-    tr_lens = np.array(tts_index[1]) - np.array(tss_index[1]) + 1
+    tr_lens = np.array(pas_index[1]) - np.array(tss_index[1]) + 1
 
     seq_likelihood_float = [float(ll) for ll in seq_likelihood]
     tss_logprobs_float = [float(ll) for ll in tss_logprobs]
-    tts_logprobs_float = [float(ll) for ll in tts_logprobs]
+    pas_logprobs_float = [float(ll) for ll in pas_logprobs]
 
     seq_lls = {
         'transcript_id': sharded_dataset['transcript_id'],
@@ -141,7 +141,7 @@ for i in range(last_saved_shard + 1, args.num_shards):
         'tr_len': tr_lens.tolist(),
         'likelihood': seq_likelihood_float,
         'tss_logprobs': tss_logprobs_float,
-        'tts_logprobs': tts_logprobs_float
+        'pas_logprobs': pas_logprobs_float
         }
 
     seq_lls = pd.DataFrame(seq_lls)

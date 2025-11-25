@@ -5,7 +5,7 @@ import argparse
 import pickle
 import glob
 
-from modeling_hyena import StripedHyenaModelForExtractingEmbeddings
+from modeling_mach import StripedHyenaModelForExtractingEmbeddings
 
 import numpy as np
 import pandas as pd
