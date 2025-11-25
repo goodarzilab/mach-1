@@ -11,12 +11,12 @@ mach-1
 │   ├── prepare_data.R         # RNA sequence preprocessing and formatting utilities
 │   └── tokenize_data.py       # Batch tokenizer for genomic fastas/CSVs
 ├── training-model/           # Configuration, training, and inference scripts
-│   ├── configuration_hyena.py # Default StripedHyena model definition
+│   ├── configuration_mach.py # Default StripedHyena model definition
 │   ├── generate_seqs.py       # Synthetic sequence generation entry point
 │   ├── get_embeddings.py      # Embedding extraction for downstream analyses
 │   ├── get_likelihoods.py     # Likelihood computation and scoring helpers
 │   ├── mach_dependencies.sh   # Environment bootstrap script
-│   ├── modeling_hyena.py      # Core Hyena architecture implementation
+│   ├── modeling_mach.py      # Core Hyena architecture implementation
 │   └── train_model.py         # Training script for Mach-1 checkpoints
 └── model/                    # Pretrained checkpoints and tokenizer artifacts
 ```
